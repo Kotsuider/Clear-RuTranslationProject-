@@ -1,0 +1,8 @@
+LIBRARY version.dll
+EXPORTS
+    GetFileVersionInfoA = RealGetFileVersionInfoA
+    GetFileVersionInfoW = RealGetFileVersionInfoW
+    GetFileVersionInfoSizeA = RealGetFileVersionInfoSizeA
+    GetFileVersionInfoSizeW = RealGetFileVersionInfoSizeW
+    VerQueryValueA = RealVerQueryValueA
+    VerQueryValueW = RealVerQueryValueW
