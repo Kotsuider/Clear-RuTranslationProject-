@@ -62,8 +62,8 @@ BOOL WINAPI RealVerQueryValueW(LPCVOID pBlock, LPCWSTR lpSubBlock, LPVOID *lplpB
     return FALSE;
 }
 
-static char g_FontNameA[LF_FACESIZE] = "CTNekokoi";
-static WCHAR g_FontNameW[LF_FACESIZE] = L"CTNekokoi";
+static char g_FontNameA[LF_FACESIZE] = "OUCTSfontD1";
+static WCHAR g_FontNameW[LF_FACESIZE] = L"OUCTSfontD1";
 
 typedef HFONT (WINAPI *PFN_CreateFontIndirectA)(const LOGFONTA*);
 typedef HFONT (WINAPI *PFN_CreateFontIndirectW)(const LOGFONTW*);
@@ -86,7 +86,7 @@ static HFONT WINAPI Hook_CreateFontIndirectA(const LOGFONTA* lplf) {
     lstrcpynA(lf.lfFaceName, g_FontNameA, LF_FACESIZE);
     lf.lfCharSet = lplf->lfCharSet;
     HFONT hRes = Real_CreateFontIndirectA(&lf);
-    DbgLog("[ClearHook] -> Overridden to CTNekokoi (charset=%u), HFONT=%p\n", (unsigned char)lf.lfCharSet, hRes);
+    DbgLog("[ClearHook] -> Overridden to OUCTSfontD1 (charset=%u), HFONT=%p\n", (unsigned char)lf.lfCharSet, hRes);
     return hRes;
 }
 
@@ -124,7 +124,6 @@ static LPSTR WINAPI Hook_CharNextA(LPCSTR lpCurrentChar) {
 // < -> Õ (U+00D5)
 // + -> ¹ (U+00B9)
 // % -> ² (U+00B2)
-// = -> × (U+00D7)
 // # -> É (U+00C9)
 // ^ -> « (U+00AB)
 // @ -> » (U+00BB)
@@ -134,7 +133,6 @@ static UINT RemapCharacterToUnicode(UINT ch) {
         case '<': return 0x00D5; // Õ
         case '+': return 0x00B9; // ¹
         case '%': return 0x00B2; // ²
-        case '=': return 0x00D7; // ×
         case '#': return 0x00C9; // É
         case '^': return 0x00AB; // «
         case '@': return 0x00BB; // »
@@ -535,12 +533,12 @@ static void LoadPrivateFont() {
         char* lastSlash = strrchr(exePath, '\\');
         if (lastSlash) {
             *lastSlash = '\0';
-            snprintf(fontPath, sizeof(fontPath), "%s\\CTNekokoi.ttf", exePath);
+            snprintf(fontPath, sizeof(fontPath), "%s\\OUCTSfontD1.ttf", exePath);
         } else {
-            snprintf(fontPath, sizeof(fontPath), ".\\CTNekokoi.ttf");
+            snprintf(fontPath, sizeof(fontPath), ".\\OUCTSfontD1.ttf");
         }
     } else {
-        snprintf(fontPath, sizeof(fontPath), ".\\CTNekokoi.ttf");
+        snprintf(fontPath, sizeof(fontPath), ".\\OUCTSfontD1.ttf");
     }
 
     int res = AddFontResourceExA(fontPath, FR_PRIVATE, NULL);
