@@ -146,7 +146,6 @@ static WCHAR RemapCharW(char c) {
         case '<': return 0x00D5;
         case '+': return 0x00B9;
         case '%': return 0x00B2;
-        case '=': return 0x00D7;
         case '#': return 0x00C9;
         case '^': return 0x00AB;
         case '@': return 0x00BB;
