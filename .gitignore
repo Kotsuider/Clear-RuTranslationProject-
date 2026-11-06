@@ -17,7 +17,6 @@ sc00.dll
 vorbis.dll
 ExHIBIT.exe
 /exported_ui
-/rld
 /__pycache__
 TrnTools/ManifestBuilder.exe
 Обновить_Манифест.bat
@@ -30,3 +29,4 @@ gyu_converter.py
 gyu_converter.bat
 translate_tool.py
 rld_tool.py
+/rld 
