@@ -86,7 +86,7 @@ static HFONT WINAPI Hook_CreateFontIndirectA(const LOGFONTA* lplf) {
     lstrcpynA(lf.lfFaceName, g_FontNameA, LF_FACESIZE);
     lf.lfCharSet = lplf->lfCharSet;
     HFONT hRes = Real_CreateFontIndirectA(&lf);
-    DbgLog("[ClearHook] -> Overridden to OUCTSfontD1 (charset=%u), HFONT=%p\n", (unsigned char)lf.lfCharSet, hRes);
+    DbgLog("[ClearHook] -> Overridden to %s (charset=%u), HFONT=%p\n", g_FontNameA, (unsigned char)lf.lfCharSet, hRes);
     return hRes;
 }
 
@@ -136,6 +136,7 @@ static UINT RemapCharacterToUnicode(UINT ch) {
         case '#': return 0x00C9; // É
         case '^': return 0x00AB; // «
         case '@': return 0x00BB; // »
+        case ';': return 0x00A1; // ¡
         default:  return ch;
     }
 }
@@ -149,6 +150,7 @@ static WCHAR RemapCharW(char c) {
         case '#': return 0x00C9;
         case '^': return 0x00AB;
         case '@': return 0x00BB;
+        case ';': return 0x00A1;
         default:  return 0;
     }
 }
@@ -303,9 +305,10 @@ static void HookIAT(HMODULE hMod, const char* targetDll, const char* funcName, v
                 if (!(pOrigThunk->u1.Ordinal & IMAGE_ORDINAL_FLAG)) {
                     IMAGE_IMPORT_BY_NAME* pName = (IMAGE_IMPORT_BY_NAME*)(pBase + pOrigThunk->u1.AddressOfData);
                     if (strcmp((char*)pName->Name, funcName) == 0) {
+                        if (pThunk->u1.Function == (DWORD)newFunc) return;
                         DWORD oldProtect;
-                        VirtualProtect(&pThunk->u1.Function, sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProtect);
-                        pThunk->u1.Function = (DWORD)newFunc;
+                        if (!VirtualProtect(&pThunk->u1.Function, sizeof(void*), PAGE_READWRITE, &oldProtect)) return;
+                        InterlockedExchange((volatile LONG*)&pThunk->u1.Function, (LONG)newFunc);
                         VirtualProtect(&pThunk->u1.Function, sizeof(void*), oldProtect, &oldProtect);
                         DbgLog("[ClearHook] HookIAT: Successfully patched %s in module %p\n", funcName, hMod);
                         return;
@@ -315,6 +318,9 @@ static void HookIAT(HMODULE hMod, const char* targetDll, const char* funcName, v
         }
     }
 }
+
+#include "file_overlay.h"
+#include "safe_acmp.h"
 
 static void HookCharNextEverywhere() {
     HMODULE hResident = GetModuleHandleA("resident.dll");
@@ -508,6 +514,7 @@ static PFN_LoadLibraryExA Real_LoadLibraryExA = NULL;
 
 static HMODULE WINAPI Hook_LoadLibraryA(LPCSTR lpLibFileName) {
     HMODULE hMod = Real_LoadLibraryA(lpLibFileName);
+    InstallFileOverlay();
     if (hMod && lpLibFileName && strstr(lpLibFileName, "resident.dll") != NULL) {
         DbgLog("[ClearHook] Hook_LoadLibraryA caught resident.dll (%p) -> Patching...\n", hMod);
         PatchResidentDll();
@@ -517,6 +524,7 @@ static HMODULE WINAPI Hook_LoadLibraryA(LPCSTR lpLibFileName) {
 
 static HMODULE WINAPI Hook_LoadLibraryExA(LPCSTR lpLibFileName, HANDLE hFile, DWORD dwFlags) {
     HMODULE hMod = Real_LoadLibraryExA(lpLibFileName, hFile, dwFlags);
+    InstallFileOverlay();
     if (hMod && lpLibFileName && strstr(lpLibFileName, "resident.dll") != NULL) {
         DbgLog("[ClearHook] Hook_LoadLibraryExA caught resident.dll (%p) -> Patching...\n", hMod);
         PatchResidentDll();
@@ -527,24 +535,70 @@ static HMODULE WINAPI Hook_LoadLibraryExA(LPCSTR lpLibFileName, HANDLE hFile, DW
 static void LoadPrivateFont() {
     char exePath[MAX_PATH];
     char fontPath[MAX_PATH];
+    char iniPath[MAX_PATH];
 
     if (GetModuleFileNameA(NULL, exePath, MAX_PATH)) {
         char* lastSlash = strrchr(exePath, '\\');
         if (lastSlash) {
             *lastSlash = '\0';
-            snprintf(fontPath, sizeof(fontPath), "%s\\OUCTSfontD1.ttf", exePath);
+            snprintf(iniPath, sizeof(iniPath), "%s\\fontconf.ini", exePath);
         } else {
-            snprintf(fontPath, sizeof(fontPath), ".\\OUCTSfontD1.ttf");
+            snprintf(iniPath, sizeof(iniPath), ".\\fontconf.ini");
         }
     } else {
-        snprintf(fontPath, sizeof(fontPath), ".\\OUCTSfontD1.ttf");
+        snprintf(iniPath, sizeof(iniPath), ".\\fontconf.ini");
+    }
+
+    // Read FONT from fontconf.ini (first checks [Font] section, fallback to plain file search)
+    char configuredFont[LF_FACESIZE] = {0};
+    GetPrivateProfileStringA("Font", "FONT", "", configuredFont, sizeof(configuredFont), iniPath);
+    if (!configuredFont[0]) {
+        FILE* fp = fopen(iniPath, "r");
+        if (fp) {
+            char line[256];
+            while (fgets(line, sizeof(line), fp)) {
+                char* p = line;
+                while (*p == ' ' || *p == '\t') p++;
+                if (!_strnicmp(p, "FONT", 4)) {
+                    p += 4;
+                    while (*p == ' ' || *p == '\t') p++;
+                    if (*p == '=') {
+                        p++;
+                        while (*p == ' ' || *p == '\t') p++;
+                        char* end = p + strlen(p);
+                        while (end > p && (*(end - 1) == '\r' || *(end - 1) == '\n' || *(end - 1) == ' ' || *(end - 1) == '\t')) {
+                            end--;
+                        }
+                        *end = '\0';
+                        if (strlen(p) > 0) {
+                            lstrcpynA(configuredFont, p, LF_FACESIZE);
+                            break;
+                        }
+                    }
+                }
+            }
+            fclose(fp);
+        }
+    }
+
+    if (configuredFont[0]) {
+        lstrcpynA(g_FontNameA, configuredFont, LF_FACESIZE);
+        MultiByteToWideChar(CP_ACP, 0, g_FontNameA, -1, g_FontNameW, LF_FACESIZE);
+    }
+
+    if (exePath[0]) {
+        snprintf(fontPath, sizeof(fontPath), "%s\\%s.ttf", exePath, g_FontNameA);
+    } else {
+        snprintf(fontPath, sizeof(fontPath), ".\\%s.ttf", g_FontNameA);
     }
 
     int res = AddFontResourceExA(fontPath, FR_PRIVATE, NULL);
-    DbgLog("[ClearHook] AddFontResourceExA('%s'): added %d font(s)\n", fontPath, res);
+    DbgLog("[ClearHook] AddFontResourceExA('%s'): added %d font(s) (Active font: %s)\n", fontPath, res, g_FontNameA);
 }
 
 static void InitHooks() {
+    InitFileOverlay();
+    HookIAT(GetModuleHandleA(NULL), "SHELL32.dll", "ShellExecuteExA", (void*)SafeAcmpExecute);
     HMODULE hGdi = GetModuleHandleA("gdi32.dll");
     if (!hGdi) hGdi = LoadLibraryA("gdi32.dll");
     if (hGdi) {

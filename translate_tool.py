@@ -35,7 +35,7 @@ for _lat, _cyr in _RU_F_LOWER.items():
 _CYR_SPECIAL = {
     'Ъ': '[',   'Ь': ']',   'ё': '`',
     'э': '{',   'ы': '|',   'я': '}',
-    'Ы': '\xa1',
+    'Ы': ';',
     'ь': '&',
     'ъ': '+',
     'Ю': '%',
@@ -262,7 +262,7 @@ def export_xlsx(input_dir='rld_backup', output_file='clear_translation.xlsx'):
 # ─────────────────────────────────────────────────────────────────────────────
 # ИМПОРТ / СБОРКА ИЗ EXCEL (.xlsx)
 # ─────────────────────────────────────────────────────────────────────────────
-def inject_from_xlsx(xlsx_path='clear_translation.xlsx', orig_dir='rld_backup', out_dir='rld'):
+def inject_from_xlsx(xlsx_path='clear_translation.xlsx', orig_dir='rld_backup', out_dir=os.path.join('translation', 'rld')):
     if not os.path.exists(xlsx_path):
         print(f"Error: {xlsx_path} not found!")
         return
@@ -316,7 +316,7 @@ def inject_from_xlsx(xlsx_path='clear_translation.xlsx', orig_dir='rld_backup', 
 # ─────────────────────────────────────────────────────────────────────────────
 # ИМПОРТ / СБОРКА ИЗ MARKDOWN (.md)
 # ─────────────────────────────────────────────────────────────────────────────
-def inject_from_md(md_dir='md', orig_dir='rld_backup', out_dir='rld'):
+def inject_from_md(md_dir='md', orig_dir='rld_backup', out_dir=os.path.join('translation', 'rld')):
     md_files = glob.glob(os.path.join(md_dir, '*.md'))
     print(f"Importing translations from Markdown ({len(md_files)} files)...")
     count = 0
@@ -399,8 +399,16 @@ def inject_single_file(orig_rld_path: str, translations: dict, out_rld_path: str
         new_buf.extend(buffer[curr_pos:])
 
     os.makedirs(os.path.dirname(out_rld_path), exist_ok=True)
-    with open(out_rld_path, 'wb') as f:
-        f.write(new_buf)
+    import time
+    for attempt in range(5):
+        try:
+            with open(out_rld_path, 'wb') as f:
+                f.write(new_buf)
+            break
+        except OSError:
+            if attempt == 4:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CLI

@@ -16,3 +16,17 @@ resident.dll
 sc00.dll
 vorbis.dll
 ExHIBIT.exe
+/exported_ui
+/rld
+/__pycache__
+TrnTools/ManifestBuilder.exe
+Обновить_Манифест.bat
+boot_test.log
+.manifestignore
+build_and_copy.bat
+dump_gyu.exe
+EXIM.txt
+gyu_converter.py
+gyu_converter.bat
+translate_tool.py
+rld_tool.py
