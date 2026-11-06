@@ -25,10 +25,10 @@ boot_test.log
 build_and_copy.bat
 dump_gyu.exe
 EXIM.txt
-gyu_converter.py
-gyu_converter.bat
-translate_tool.py
-rld_tool.py
 /rld 
 /TrnTools/Backups
 inject_md.bat
+/gyu_converter.py
+/gyu_converter.bat
+/translate_tool.py
+/rld_tool.py
