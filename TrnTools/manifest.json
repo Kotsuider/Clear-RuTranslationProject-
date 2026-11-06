@@ -1,22 +1,12 @@
 {
   "manifest_version": 1,
-  "generated_at": "2026-11-06T13:44:05.1316321Z",
-  "version": "1.0.0",
+  "generated_at": "2026-11-06T14:56:26.2541939Z",
+  "version": "1.0.1",
   "files": [
     {
       "path": "fontconf.ini",
       "sha256": "95b9a0f1da054b2db9be71f99c0cfe0637d76434ad7c4ab4289f02eaf144e09a",
       "size": 61
-    },
-    {
-      "path": "OUCTSfontD1.ttf",
-      "sha256": "b3a073cf148f30ac476f19395be78ca26240962a8fc667f753cf7e51ed56a852",
-      "size": 148768
-    },
-    {
-      "path": "OUCTSfontG.ttf",
-      "sha256": "2a8af46497b97b8523551afa6ddf37ca9c7761e04f2b1ef38224046baa57f709",
-      "size": 148112
     },
     {
       "path": "version.dll",
@@ -27,6 +17,16 @@
       "path": "ПроверкаОбновленийПеревода.exe",
       "sha256": "664a74ba1b62e381347c640f93598e4e3d56bd5937a1eb8c1d651b6ae0269762",
       "size": 64915415
+    },
+    {
+      "path": "TrnTools/OUCTSfontD1.ttf",
+      "sha256": "b3a073cf148f30ac476f19395be78ca26240962a8fc667f753cf7e51ed56a852",
+      "size": 148768
+    },
+    {
+      "path": "TrnTools/OUCTSfontG.ttf",
+      "sha256": "2a8af46497b97b8523551afa6ddf37ca9c7761e04f2b1ef38224046baa57f709",
+      "size": 148112
     },
     {
       "path": "translation/rld/0610a_01.rld",

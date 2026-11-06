@@ -1,38 +1,38 @@
-{
-  "version": "1.0.0",
-  "game_title": "Clear",
-  "check_process": "ExHIBIT.exe",
-  "manifest_url": "https://raw.githubusercontent.com/Kotsuider/Clear-RuTranslationProject-/main/TrnTools/manifest.json",
-  "files_base_url": "https://raw.githubusercontent.com/Kotsuider/Clear-RuTranslationProject-/main",
-  "updater": [
-    {
-      "state": "true"
-    }
-  ],
-  "fixes": [
-    {
-      "state": "true",
-      "id": "install_font_cyrillic",
-      "name": "Шрифт OUCTSfontD1 (Кириллица)",
-      "file": "OUCTSfontD1.ttf"
-    },
-    {
-      "state": "true",
-      "id": "install_font_glagolic",
-      "name": "Шрифт OUCTSfontG (Глаголица)",
-      "file": "OUCTSfontG.ttf"
-    }
-  ],
-  "glagolic": [
-    {
-      "state": "true",
-      "id": "change_font",
-      "name": "Смена шрифта в ВН на глаголицу",
-      "file": "fontconf.ini"
-    }
-  ],
-  "backup": {
-    "enabled": true,
-    "backup_dir": "Backups"
-  }
+﻿{
+    "version":  "1.0.1",
+    "game_title":  "Clear",
+    "check_process":  "ExHIBIT.exe",
+    "manifest_url":  "https://raw.githubusercontent.com/Kotsuider/Clear-RuTranslationProject-/main/TrnTools/manifest.json",
+    "files_base_url":  "https://raw.githubusercontent.com/Kotsuider/Clear-RuTranslationProject-/main",
+    "updater":  [
+                    {
+                        "state":  "true"
+                    }
+                ],
+    "fixes":  [
+                  {
+                      "state":  "true",
+                      "id":  "install_font_cyrillic",
+                      "name":  "Шрифт OUCTSfontD1 (Кириллица)",
+                      "file":  "OUCTSfontD1.ttf"
+                  },
+                  {
+                      "state":  "true",
+                      "id":  "install_font_glagolic",
+                      "name":  "Шрифт OUCTSfontG (Глаголица)",
+                      "file":  "OUCTSfontG.ttf"
+                  }
+              ],
+    "glagolic":  [
+                     {
+                         "state":  "true",
+                         "id":  "change_font",
+                         "name":  "Смена шрифта в ВН на глаголицу",
+                         "file":  "fontconf.ini"
+                     }
+                 ],
+    "backup":  {
+                   "enabled":  true,
+                   "backup_dir":  "Backups"
+               }
 }
